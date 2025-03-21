@@ -16,7 +16,7 @@ Follow these steps to set up and run the project locally:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-username/test-shop.git
+   git clone https://github.com/Layanga-Rajapakshe/test-shop.git
    ```
 
 2. Navigate to the project directory:
