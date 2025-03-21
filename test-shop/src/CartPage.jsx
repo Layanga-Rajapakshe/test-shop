@@ -21,50 +21,42 @@ const CartPage = () => {
     
     const handleDelete = async (id) => {
         try {
-            await DeleteCart(id);
-            // Refresh the cart after deletion
-            fetchCart();
+            // Make sure id is a string
+            const docId = String(id);
+            // Get a reference to the document first
+            const docRef = doc(db, 'cart', docId);
+            // Then delete it
+            await deleteDoc(docRef);
+            console.log('Document successfully deleted!');
+            // Update the cart locally
+            setCart(prevCart => prevCart.filter(item => item.id !== id));
         } catch (error) {
             console.error("Error in handleDelete:", error);
         }
     }
 
-    const DeleteCart = async (id) => {
+    const handleQuantityChange = async (item, newQuantity) => {
         try {
-            // First create a document reference, then delete it
-            const documentRef = doc(db, 'cart', id);
-            await deleteDoc(documentRef);
-            console.log('Document successfully deleted!');
-            return true;
-        } catch (error) {
-            console.error('Error deleting document: ', error);
-            throw error; // Rethrow to handle in the calling function
-        }
-    }
-
-    const EditCart = async (product) => {
-        try {
-            const docRef = doc(db, 'cart', product.id);
+            // Make sure quantity is at least 1
+            const quantity = Math.max(1, parseInt(newQuantity));
+            // Make sure id is a string
+            const docId = String(item.id);
+            // Get a reference to the document
+            const docRef = doc(db, 'cart', docId);
+            // Update the document
             await updateDoc(docRef, {
-                quantity: product.quantity,
+                quantity: quantity,
             });
             console.log('Document successfully updated!');
-            // No need to refresh the entire cart, just update the local state
+            // Update the local state
             setCart(prevCart => 
-                prevCart.map(item => 
-                    item.id === product.id ? {...item, quantity: product.quantity} : item
+                prevCart.map(cartItem => 
+                    cartItem.id === item.id ? {...cartItem, quantity: quantity} : cartItem
                 )
             );
         } catch (error) {
             console.error('Error updating document: ', error);
         }
-    }
-
-    const handleQuantityChange = (item, newQuantity) => {
-        // Make sure quantity is at least 1
-        const quantity = Math.max(1, parseInt(newQuantity));
-        // Update in Firestore
-        EditCart({...item, quantity});
     }
 
     // Calculate total price
